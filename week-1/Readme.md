@@ -435,7 +435,13 @@ Now, the terraform code main.tf is as below:
 
  ![ec2](./images/ec2-instances.png)
 
+* You can view the website by typing the public ip-address of any one of the two ec2 instances on a web browser.
+
+![website](./images/website-2.png)
+
 * Type `terraform destroy` to destroy (clean-up) all the resources created by terraform,
+
+![terraform](./images/terraform-destroy.png)
 ### Architectural diagram for EC2 Autoscaling
 Below is a sample diagram for EC2 autoscaling downloaded from [AWS page workshop]( https://catalog.workshops.aws/general-immersionday/en-US/basic-modules/10-ec2/ec2-auto-scaling/ec2-auto-scaling/2-ec2-as)
 ![Diagram](./images/ec2-autoscaling-architecture.png)

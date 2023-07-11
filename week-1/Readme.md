@@ -18,8 +18,6 @@ Basic modules consist of the following agenda:
  * Storage - Amazon S3, Amazon Elastic File System
  * Provision - AWS CloudFormation
 
-Through each hands on lab, let's find out the characteristics of each service.
-
 --------
 ________
 
@@ -156,12 +154,27 @@ Note: I added a third option, which is creating and launching an EC2 instance us
 ______
 
 ### Create EC2 Instance with Terraform (Option 3)
-Step 1: Install required software and tools
-* Install Terraform.
-* Install AWS CLI.
-* Configure aws cli to be used in Terraform.
+* Install required software and tools
+    * Install Terraform.
+    * Install AWS CLI.
+    * Configure aws cli to be used in Terraform.
 
-Step 2: Create a directory for terraform deployment. I named mine, Demo web-server tf. Change directory into the folder using `cd` command 
+### Important Terraform commands.
+
+1. terraform init: This command is used for initialize the terraform.
+
+2. terraform fmt: This command is used for format the terraform code.
+
+3. terraform validate: This command is used for validate the terraform code.
+
+4. terraform plan: This command is used to describe the plan. This is highly recommended to run before apply the changes.
+
+5. terraform show: Show the current state or a saved plan
+
+6. terraform apply: If you are statisfy with changes, run this command to apply the changes.
+
+
+* Now, Create a directory for terraform deployment. I named mine, `Demo web-server tf`. Change directory into the folder using `cd` command 
 
 ![cd](./images/cd-tf.png)
 
@@ -183,8 +196,8 @@ Step 3:  Create a Key pair.
 
         # Create a Key pair
 
-        resource "aws_key_pair" "sanjeeb-aws-key-pair" {
-        key_name   = "sanjeeb-aws-key-pair"
+        resource "aws_key_pair" "abdul-aws-key-pair" {
+        key_name   = "abdul-aws-key-pair"
         public_key = tls_private_key.rsa.public_key_openssh
         }
 
@@ -195,26 +208,12 @@ Step 3:  Create a Key pair.
         }
 
         # Create a local file
-        resource "local_file" "sanjeeb-aws-key-pair" {
+        resource "local_file" "abdul-aws-key-pair" {
         content  = tls_private_key.rsa.private_key_pem
         filename = "abdul-aws-key-pair"
         }
 
-We used the below terraform code to create a key pair. 
-
-### Important Terraform commands.
-
-1. terraform init: This command is used for initialize the terraform.
-
-2. terraform fmt: This command is used for format the terraform code.
-
-3. terraform validate: This command is used for validate the terraform code.
-
-4. terraform plan: This command is used to describe the plan. This is highly recommended to run before apply the changes.
-
-5. terraform show: Show the current state or a saved plan
-
-6. terraform apply: If you are statisfy with changes, run this command to apply the changes.
+We used the terraform code above to create a key pair. 
 
 Step 2: Create our Webserver (EC2 instance)
 
@@ -260,26 +259,31 @@ To make the code from terraform, create template file called userdata.tpl in the
     # Update existing packages
     yum -y update
 
-* Type `terraform apply` 
+* Type `terraform plan` 
+
+* Type `terraform apply`
 
 Step 3: Creating a Launch Template
 
-We will use below terraform code for creating a launch template. I amupdating my terraform `main.tf`, so you will get the final one in the code folder.
+We will use below terraform code for creating a launch template. I am updating my terraform `main.tf`, so you will get the final one in the code folder.
 
-resource "aws_launch_template" "aws-launch-template" {
-  name = "aws-launch-template"
-  image_id = data.aws_ami.amazon-linux-2.id
-  instance_type = "t2.micro"
-  key_name = aws_key_pair.abdul-aws-key-pair.key_name
-  vpc_security_group_ids = [aws_security_group.aws-sg-webserver.id]
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name = "aws-webserver-demo"
+    resource "aws_launch_template" "aws-launch-template" {
+    name = "aws-launch-template"
+    image_id = data.aws_ami.amazon-linux-2.id
+    instance_type = "t2.micro"
+    key_name = aws_key_pair.abdul-aws-key-pair.key_name
+    vpc_security_group_ids = [aws_security_group.aws-sg-webserver.id]
+    tag_specifications {
+        resource_type = "instance"
+        tags = {
+        Name = "aws-webserver-demo"
+        }
     }
-  }
-  user_data = file("userdata.tpl")
-}
+    user_data = file("userdata.tpl")
+    }
+
+   `Launch Template`
+  ![lauch](./images/launch%20template.png)
 
 Step 4: Setup an Auto Scaling Group
 
@@ -298,6 +302,9 @@ we set the desired capacity to two (2) and if the traffic increases, the number 
     }
     }
 
+`Auto-scaling-Groups`
+   ![auto](./images/auto-scaling-group-1.png)
+   ![auto](./images/auto-scaling-group-2.png)
 Now, the terraform code main.tf is as below:
 
     terraform {
@@ -316,8 +323,8 @@ Now, the terraform code main.tf is as below:
 
     # Create a Key pair
 
-    resource "aws_key_pair" "sanjeeb-aws-key-pair" {
-    key_name   = "sanjeeb-aws-key-pair"
+    resource "aws_key_pair" "abdul-aws-key-pair" {
+    key_name   = "abdul-aws-key-pair"
     public_key = tls_private_key.rsa.public_key_openssh
     }
 
@@ -328,9 +335,9 @@ Now, the terraform code main.tf is as below:
     }
 
     # Create a local file
-    resource "local_file" "sanjeeb-aws-key-pair" {
+    resource "local_file" "abdul-aws-key-pair" {
     content  = tls_private_key.rsa.private_key_pem
-    filename = "sanjeeb-aws-key-pair"
+    filename = "abdul-aws-key-pair"
     }
 
     # Get latest Amazon Linux 2 AMI
@@ -382,7 +389,7 @@ Now, the terraform code main.tf is as below:
     ami                    = data.aws_ami.amazon-linux-2.id
     instance_type          = "t2.micro"
     vpc_security_group_ids = [aws_security_group.aws-sg-webserver.id]
-    key_name               = aws_key_pair.sanjeeb-aws-key-pair.key_name
+    key_name               = aws_key_pair.abdul-aws-key-pair.key_name
     user_data              = file("userdata.tpl")
 
     tags = {
@@ -395,7 +402,7 @@ Now, the terraform code main.tf is as below:
     name                   = "aws-launch-template"
     image_id               = data.aws_ami.amazon-linux-2.id
     instance_type          = "t2.micro"
-    key_name               = aws_key_pair.sanjeeb-aws-key-pair.key_name
+    key_name               = aws_key_pair.abdul-aws-key-pair.key_name
     vpc_security_group_ids = [aws_security_group.aws-sg-webserver.id]
     tag_specifications {
         resource_type = "instance"
@@ -418,7 +425,21 @@ Now, the terraform code main.tf is as below:
     }
     }
 
+* Now, Type the following commands
+    
+    `terraform plan`
 
+  ![terraform](./images/terraform-plan.png)
+
+* Tyep `terraform apply`,
+    type yes when the prompt to enter a value
+
+![apply](./images/terraform-apply.png)
+ Great!!!. You have successfully provisioned the EC2 instance with autoscaling groups in 3 availability zones (eu-west-2a, eu-west-2b, eu-west-2c).
+
+ ![ec2](./images/ec2-instances.png)
+
+* Type `terraform destroy` to destroy (clean-up) all the resources created by terraform,
 ### Architectural diagram for EC2 Autoscaling
 Below is a sample diagram for EC2 autoscaling downloaded from [AWS page workshop]( https://catalog.workshops.aws/general-immersionday/en-US/basic-modules/10-ec2/ec2-auto-scaling/ec2-auto-scaling/2-ec2-as)
 ![Diagram](./images/ec2-autoscaling-architecture.png)
@@ -453,4 +474,4 @@ This section will setup the AWS Anomaly Detection tool that leverages advanced M
 
 This section will setup cost reporting, cost-saving opportunities by rightsizing EC2 resources, and provide sign-up for savings plans or reserved instances.
 
-### Next: Clean Up all resources created to
+### Next: Clean Up all resources created to avoid unnecessary costs

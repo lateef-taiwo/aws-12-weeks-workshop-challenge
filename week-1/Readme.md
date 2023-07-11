@@ -148,5 +148,306 @@ Note: I added a third option, which is creating and launching an EC2 instance us
 
     ![stack](./images/stack%203.png)
 
-7. We notice that cloud formation starts deployinf the stack, including vpcs, subnets, internet gateways, security group etc. 
+7. We notice that cloud formation starts deployinf the stack, including vpcs, subnets, internet gateways, security group etc. After few minutes, we can acess the website from the public ip address of any of the EC2 instances
     ![stack](./images/stack-4.png)
+
+   ![web](./images/website.png)
+------
+______
+
+### Create EC2 Instance with Terraform (Option 3)
+Step 1: Install required software and tools
+* Install Terraform.
+* Install AWS CLI.
+* Configure aws cli to be used in Terraform.
+
+Step 2: Create a directory for terraform deployment. I named mine, Demo web-server tf. Change directory into the folder using `cd` command 
+
+![cd](./images/cd-tf.png)
+
+Step 3:  Create a Key pair.
+
+        terraform {
+        required_providers {
+            aws = {
+            source  = "hashicorp/aws"
+            version = "~> 3.5.0"
+            }
+        }
+        }
+
+        # Configure the AWS Provider
+        provider "aws" {
+        region = "eu-west-2"
+        }
+
+        # Create a Key pair
+
+        resource "aws_key_pair" "sanjeeb-aws-key-pair" {
+        key_name   = "sanjeeb-aws-key-pair"
+        public_key = tls_private_key.rsa.public_key_openssh
+        }
+
+        # RSA key of size 4096 bits
+        resource "tls_private_key" "rsa" {
+        algorithm = "RSA"
+        rsa_bits  = 4096
+        }
+
+        # Create a local file
+        resource "local_file" "sanjeeb-aws-key-pair" {
+        content  = tls_private_key.rsa.private_key_pem
+        filename = "abdul-aws-key-pair"
+        }
+
+We used the below terraform code to create a key pair. 
+
+### Important Terraform commands.
+
+1. terraform init: This command is used for initialize the terraform.
+
+2. terraform fmt: This command is used for format the terraform code.
+
+3. terraform validate: This command is used for validate the terraform code.
+
+4. terraform plan: This command is used to describe the plan. This is highly recommended to run before apply the changes.
+
+5. terraform show: Show the current state or a saved plan
+
+6. terraform apply: If you are statisfy with changes, run this command to apply the changes.
+
+Step 2: Create our Webserver (EC2 instance)
+
+We will do the below steps in this lab.
+
+   * Create an EC2 instance.
+   * Bootstap Apache/PHP webserver.
+   * Install basic web page
+   * Configure security group so that we can access it via internet.
+
+To make the code from terraform, create template file called userdata.tpl in the same folder where your main.tf is stored. This is basically a bash script that installs lamp stack on the server EC2 instance
+
+  ![tf](./images/tf-init.png)
+
+`userdata.tpl`
+
+    #!/bin/sh
+
+    # Install a LAMP stack
+    amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+    yum -y install httpd php-mbstring
+
+    # Start the web server
+    chkconfig httpd on
+    systemctl start httpd
+
+    # Install the web pages for our lab
+    if [ ! -f /var/www/html/immersion-day-app-php7.tar.gz ]; then
+    cd /var/www/html
+    wget https://aws-joozero.s3.ap-northeast-2.amazonaws.com/immersion-day-app-php7.tar.gz  
+    tar xvfz immersion-day-app-php7.tar.gz
+    fi
+
+    # Install the AWS SDK for PHP
+    if [ ! -f /var/www/html/aws.zip ]; then
+    cd /var/www/html
+    mkdir vendor
+    cd vendor
+    wget https://docs.aws.amazon.com/aws-sdk-php/v3/download/aws.zip
+    unzip aws.zip
+    fi
+
+    # Update existing packages
+    yum -y update
+
+* Type `terraform apply` 
+
+Step 3: Creating a Launch Template
+
+We will use below terraform code for creating a launch template. I amupdating my terraform `main.tf`, so you will get the final one in the code folder.
+
+resource "aws_launch_template" "aws-launch-template" {
+  name = "aws-launch-template"
+  image_id = data.aws_ami.amazon-linux-2.id
+  instance_type = "t2.micro"
+  key_name = aws_key_pair.abdul-aws-key-pair.key_name
+  vpc_security_group_ids = [aws_security_group.aws-sg-webserver.id]
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "aws-webserver-demo"
+    }
+  }
+  user_data = file("userdata.tpl")
+}
+
+Step 4: Setup an Auto Scaling Group
+
+we set the desired capacity to two (2) and if the traffic increases, the number of EC2 instances will increase to 3.
+
+
+    resource "aws_autoscaling_group" "aws-autoscaling-group" {
+    availability_zones = ["eu-west-2a","eu-west-2b","eu-west-2c"]
+    desired_capacity   = 2
+    max_size           = 3
+    min_size           = 2
+
+    launch_template {
+        id      = aws_launch_template.aws-launch-template.id
+        version = "$Latest"
+    }
+    }
+
+Now, the terraform code main.tf is as below:
+
+    terraform {
+    required_providers {
+        aws = {
+        source  = "hashicorp/aws"
+        version = "~> 3.5.0"
+        }
+    }
+    }
+
+    # Configure the AWS Provider
+    provider "aws" {
+    region = "eu-west-2"
+    }
+
+    # Create a Key pair
+
+    resource "aws_key_pair" "sanjeeb-aws-key-pair" {
+    key_name   = "sanjeeb-aws-key-pair"
+    public_key = tls_private_key.rsa.public_key_openssh
+    }
+
+    # RSA key of size 4096 bits
+    resource "tls_private_key" "rsa" {
+    algorithm = "RSA"
+    rsa_bits  = 4096
+    }
+
+    # Create a local file
+    resource "local_file" "sanjeeb-aws-key-pair" {
+    content  = tls_private_key.rsa.private_key_pem
+    filename = "sanjeeb-aws-key-pair"
+    }
+
+    # Get latest Amazon Linux 2 AMI
+    data "aws_ami" "amazon-linux-2" {
+    most_recent = true
+    owners      = ["amazon"]
+    filter {
+        name   = "name"
+        values = ["amzn2-ami-hvm*"]
+    }
+    }
+
+
+    # Define the security group for the EC2 Instance
+    resource "aws_security_group" "aws-sg-webserver" {
+    name        = "aws-sg-webserver"
+    description = "Allow incoming connections"
+    vpc_id      = aws_default_vpc.default.id
+    ingress {
+        from_port   = 80
+        to_port     = 80
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow incoming HTTP connections"
+    }
+    ingress {
+        from_port   = 22
+        to_port     = 22
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+        description = "Allow incoming SSH connections (Linux)"
+    }
+    egress {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    tags = {
+        Name = "Webserver-sg"
+    }
+    }
+    resource "aws_default_vpc" "default" {
+
+    }
+
+    /*
+    resource "aws_instance" "vm-server" {
+    ami                    = data.aws_ami.amazon-linux-2.id
+    instance_type          = "t2.micro"
+    vpc_security_group_ids = [aws_security_group.aws-sg-webserver.id]
+    key_name               = aws_key_pair.sanjeeb-aws-key-pair.key_name
+    user_data              = file("userdata.tpl")
+
+    tags = {
+        Name = "aws-webserver-demo"
+    }
+    }
+    */
+
+    resource "aws_launch_template" "aws-launch-template" {
+    name                   = "aws-launch-template"
+    image_id               = data.aws_ami.amazon-linux-2.id
+    instance_type          = "t2.micro"
+    key_name               = aws_key_pair.sanjeeb-aws-key-pair.key_name
+    vpc_security_group_ids = [aws_security_group.aws-sg-webserver.id]
+    tag_specifications {
+        resource_type = "instance"
+        tags = {
+        Name = "aws-webserver-demo"
+        }
+    }
+    user_data = filebase64("userdata.tpl")
+    }
+
+    resource "aws_autoscaling_group" "aws-autoscaling-group" {
+    availability_zones = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+    desired_capacity   = 2
+    max_size           = 3
+    min_size           = 2
+
+    launch_template {
+        id      = aws_launch_template.aws-launch-template.id
+        version = "$Latest"
+    }
+    }
+
+
+---------
+_________
+
+### Setup AWS Cost Management Tools
+
+The Cost Management Console provides useful tools to help gather information related to cost and usage, analyze cost drivers and usage trends, take actions to budget spending, identify cost anomalies, and purchase savings plans.
+
+### Setup AWS Cost Explorer
+
+This section will setup the Cost Explorer tool that is used for generating cost reports and performing the cost analysis for resource consumption.
+
+1. Select AWS Cost Management page here 
+. Note: The dashboard displays a graph showing the current cost and usage metrics, and can be filtered using the Report parameters located on the right side.
+
+2. Select Preferences from the menu on the left side of the AWS Cost Management Console.
+
+3. Select Receive Amazon EC2 Resource Recommendations to receive rightsizing recommendations for EC2 instances, and select the Save Preferences button.
+  ![cost-explorer](./images/cost-explorer.png)
+
+### Setup AWS Budgets
+
+This section will setup the AWS Budgets tool that is used to monitor spending and create notifications when amounts go past the set pricing limit.
+
+### Setup AWS Anomaly Detection
+
+This section will setup the AWS Anomaly Detection tool that leverages advanced Machine Learning technologies to identify anomalous spend and root causes, to quickly take action.
+
+### Optimize Resources
+
+This section will setup cost reporting, cost-saving opportunities by rightsizing EC2 resources, and provide sign-up for savings plans or reserved instances.
+
+### Next: Clean Up all resources created to

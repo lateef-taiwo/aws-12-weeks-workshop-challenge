@@ -419,9 +419,12 @@ Now, the terraform code main.tf is as below:
     }
 
 
+### Architectural diagram for EC2 Autoscaling
+Below is a sample diagram for EC2 autoscaling downloaded from [AWS page workshop]( https://catalog.workshops.aws/general-immersionday/en-US/basic-modules/10-ec2/ec2-auto-scaling/ec2-auto-scaling/2-ec2-as)
+![Diagram](./images/ec2-autoscaling-architecture.png)
+
 ---------
 _________
-
 ### Setup AWS Cost Management Tools
 
 The Cost Management Console provides useful tools to help gather information related to cost and usage, analyze cost drivers and usage trends, take actions to budget spending, identify cost anomalies, and purchase savings plans.

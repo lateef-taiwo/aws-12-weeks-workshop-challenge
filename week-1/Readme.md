@@ -1,7 +1,3 @@
- The 12-weeks workshop challenge is inspired by Prasad Rao ( LinkedIn Link - https://www.linkedin.com/feed/update/urn:li:activity:7044291636020834304/)
-
-------
-------
 ## Week-1 Overview
 In Week 1 Challenge, we will go through the below topics.
 

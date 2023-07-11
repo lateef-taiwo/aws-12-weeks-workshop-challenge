@@ -279,6 +279,7 @@ We will use below terraform code for creating a launch template. I am updating m
     }
 
    `Launch Template`
+
   ![lauch](./images/launch%20template.png)
 
 Step 4: Setup an Auto Scaling Group
@@ -299,7 +300,9 @@ we set the desired capacity to two (2) and if the traffic increases, the number 
     }
 
 `Auto-scaling-Groups`
+
    ![auto](./images/auto-scaling-group-1.png)
+
    ![auto](./images/auto-scaling-group-2.png)
 Now, the terraform code main.tf is as below:
 
@@ -431,6 +434,7 @@ Now, the terraform code main.tf is as below:
     type yes when the prompt to enter a value
 
 ![apply](./images/terraform-apply.png)
+
  Great!!!. You have successfully provisioned the EC2 instance with autoscaling groups in 3 availability zones (eu-west-2a, eu-west-2b, eu-west-2c).
 
  ![ec2](./images/ec2-instances.png)

@@ -146,6 +146,8 @@ Note: I added a third option, which is creating and launching an EC2 instance us
     ![stack](./images/stack-4.png)
 
    ![web](./images/website.png)
+
+* Delete the cloudformation stack to clean up all resources created.
 ------
 ______
 

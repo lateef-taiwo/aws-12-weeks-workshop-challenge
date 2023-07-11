@@ -3,7 +3,7 @@
 ------
 ------
 ## Week-1 Overview
-In the Week 1 Challenge, we will go through the below topics.
+In Week 1 Challenge, we will go through the below topics.
 
 * Basic Modules
 In this basic modules, you can learn various functions of each AWS foundational service.
@@ -102,5 +102,51 @@ Select the Create AWS account button to complete setup.
 ![org](./images/aws-organizations-4.png)
 
 6. The Services tab allows a user to give trust access to services to be used across the organization.
+  Note: AWS recommends that you do not enable trusted access with an AWS service on this page. Instead, use the service’s console to enable and disable trusted access with AWS Organizations. This allows the other service to perform any supporting tasks needed to enable or disable access with Organizations. For more information, see the documentation for the AWS service you want to use. 
+
+ ![org](./images/org-services.png)
 
 7. The Policies tab allows a user to specify policies that need to be maintained across the organization.
+![policies](./images/org-policies.png)
+
+8. The Settings tab provides a summary of the details of the organization, administrators delegated to manage the services or organization, and the ability to delete the organization.
+
+9. Up Next, we will start creating cloud resources.
+
+----------
+__________
+### Create Cloud Resources
+The next step in the process is to create a resource to monitor billing and usage details. This workshop includes 2 options to create resources, the first will be done by using the AWS console [Create EC2 Instance with the AWS Console (Option 1)](https://catalog.workshops.aws/general-immersionday/en-US/basic-modules/70-cost/introduction-to-cost-management/step-4#create-ec2-instance-with-the-aws-console-(option-1)). The second option is to create an EC2 instance using AWS CloudFormation. The CloudFormation EC2 instance will host an apache server that displays a webpage containing the EC2 instance details when viewed via a web browser. 
+Note: I added a third option, which is creating and launching an EC2 instance using terraform.
+
+### Create EC2 Instance with AWS CloudFormation (Option 2)
+
+1. To begin, save the following template (FinalTemplate.yml) from the s3 bucket here 
+
+2. Navigate to the CloudFormation service page  and select Create Stack
+
+ ![cloudformation](./images/cloudformation.png)
+
+3. Verify that Template is ready is selected, and select Upload a template file.
+
+4. Select the Choose File button. Select final_template.yml file that was downloaded in the first step. Select Next.
+
+5. For the stack details type,
+ 
+        Stack Name: MyStack
+        Instance Type: T3.micro
+        Select Next.
+   ![stack](./images/stack.png)
+6. Add a tag with the following values:
+
+        Key: Name
+        Value: CostOp
+        Select Next
+        Select Submit to deploy the EC2 instance.
+    
+    ![stack](./images/stack%202.png)
+
+    ![stack](./images/stack%203.png)
+
+7. We notice that cloud formation starts deployinf the stack, including vpcs, subnets, internet gateways, security group etc. 
+    ![stack](./images/stack-4.png)

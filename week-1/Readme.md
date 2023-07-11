@@ -50,3 +50,5 @@ I create a two users and also created a group, then I granted the group the Admi
 ![IAM](./images/iam2.png)
 
 ![IAM](./images/iam-user.png)
+
+### Enable Billing Alarms and Cost Allocation Tags

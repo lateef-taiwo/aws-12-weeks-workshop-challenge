@@ -427,7 +427,7 @@ Now, the terraform code main.tf is as below:
 
   ![terraform](./images/terraform-plan.png)
 
-* Tyep `terraform apply`,
+* Type `terraform apply`,
     type yes when the prompt to enter a value
 
 ![apply](./images/terraform-apply.png)

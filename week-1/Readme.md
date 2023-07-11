@@ -284,7 +284,7 @@ We will use below terraform code for creating a launch template. I am updating m
 
 Step 4: Setup an Auto Scaling Group
 
-we set the desired capacity to two (2) and if the traffic increases, the number of EC2 instances will increase to 3.
+we set the desired capacity to two (2) and if the traffic increases, the number of EC2 instances will automatically increase to 3.
 
 
     resource "aws_autoscaling_group" "aws-autoscaling-group" {

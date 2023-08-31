@@ -155,7 +155,7 @@ ______
 * Install required software and tools
     * Install Terraform.
     * Install AWS CLI.
-    * Configure aws cli to be used in Terraform.
+    * Configure aws cli so that it can use Terraform to make api calls to AWS cloud.
 
 ### Important Terraform commands.
 

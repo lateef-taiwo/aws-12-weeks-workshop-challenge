@@ -159,11 +159,11 @@ ______
 
 ### Important Terraform commands.
 
-1. terraform init: This command is used for initialize the terraform.
+1. terraform init: This command is used to initialize the terraform.
 
-2. terraform fmt: This command is used for format the terraform code.
+2. terraform fmt: This command is used to format the terraform code.
 
-3. terraform validate: This command is used for validate the terraform code.
+3. terraform validate: This command is used to validate the terraform code.
 
 4. terraform plan: This command is used to describe the plan. This is highly recommended to run before apply the changes.
 

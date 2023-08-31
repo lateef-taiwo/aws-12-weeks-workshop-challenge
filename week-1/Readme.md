@@ -449,7 +449,7 @@ Now, the terraform code main.tf is as below:
 
 ![terraform](./images/terraform-destroy.png)
 ### Architectural diagram for EC2 Autoscaling
-Below is a sample diagram for EC2 autoscaling downloaded from [AWS page workshop]( https://catalog.workshops.aws/general-immersionday/en-US/basic-modules/10-ec2/ec2-auto-scaling/ec2-auto-scaling/2-ec2-as)
+Below is a sample diagram for EC2 autoscaling downloaded from [AWS workshop page]( https://catalog.workshops.aws/general-immersionday/en-US/basic-modules/10-ec2/ec2-auto-scaling/ec2-auto-scaling/2-ec2-as)
 ![Diagram](./images/ec2-autoscaling-architecture.png)
 
 ---------
